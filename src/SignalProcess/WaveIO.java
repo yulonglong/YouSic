@@ -92,14 +92,11 @@ public class WaveIO {
      * @param path of the input wave file
      * @return a short array of anysize containing the amplitudes in the wave file
      */
-    public static short[] readWave(String path){
+    public static short[] readWave(String path) {
+    	return readWave(new File(path));
+    }
 
-
-        /**
-         * define a file object with the location given
-         */
-        File fileRead = new File(path);
-
+    public static short[] readWave(File fileRead) {
         /**
          * initial buffer size
          */

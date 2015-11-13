@@ -1,24 +1,30 @@
 var express = require('express');
-var app = express();
+var app = require('express')();
+var http = require('http').Server(app);
+var io = require('socket.io')(http);
 
 app.use(express.static(__dirname + '/public_html'));
 
-app.listen(process.env.PORT || 3000);
+app.get('/', function(req, res){
+  res.sendFile(__dirname + '/public_html/index.html');
+});
 
-// var app = require('express')();
-// var http = require('http').Server(app);
-// var io = require('socket.io')(http);
+io.on('connection', function(socket){
+  socket.on('youtube_url', function(url){
+    io.emit('youtube_url', url);
 
-// app.get('/', function(req, res){
-//   res.sendFile(__dirname + '/public/index.html');
-// });
+    // After receiving data from client
+    console.log('Server receive : ' + url);
+    var exec = require('child_process').exec;
+	var cmd = 'java -jar VideoDownloader/runytd2.jar ' + url;
+	exec(cmd, function(error, stdout, stderr) {
+	  console.log(stdout);
+	});
+	// end
 
-// io.on('connection', function(socket){
-//   socket.on('chat message', function(msg){
-//     io.emit('chat message', msg);
-//   });
-// });
+  });
+});
 
-// http.listen(3000, function(){
-//   console.log('listening on *:3000');
-// });
+http.listen(3000, function(){
+  console.log('listening on *:3000');
+});

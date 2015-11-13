@@ -20,7 +20,7 @@ public class Main {
 
 	private static final double MFCC_SIMILARITY_THRESHOLD = 0.98;
 	private static final double MFCC_ACCEPTANCE_THRESHOLD = 0.99;
-	private static final int FRAME_COUNT_ACCEPTANCE_THRESHOLD = 4; // Multiply by 1.5 secs for actual length.
+	private static final int FRAME_COUNT_ACCEPTANCE_THRESHOLD = 6; // Multiply by 1.5 secs for actual length.
 
 	private static final FilenameFilter WAV_EXTENSION_FILTER = new FilenameFilter() {
 		@Override

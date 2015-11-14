@@ -31,11 +31,20 @@ function downloadYoutube(url) {
 		console.log(stdout);
 
 		// Regex the youtube id from stdout
-		var myRegex = new RegExp("#info\\s-\\sYoutubeId\\s=\\s(.+)\\r\\n", "g");
-		var myArray = myRegex.exec(stdout);
-		
-		io.emit('feedback', 'Processing audio...');
-		convertToWav(myArray[1]);	
+		var regexYoutubeId = new RegExp("#info\\s-\\sYoutubeId\\s=\\s(.+)\\r\\n", "g");
+		var resultArrayYoutubeId = regexYoutubeId.exec(stdout);
+
+		// Regex the youtube id from stdout
+		var regexAlreadyDownloaded = new RegExp("#info\\s-\\s"+resultArrayYoutubeId[1]+"\\salready\\sdownloaded\\r\\n", "g");
+		var isAlreadyDownloaded = regexAlreadyDownloaded.test(stdout);
+
+		if (isAlreadyDownloaded == true) {
+			io.emit('completed', 'Download completed!');
+		}
+		else {
+			io.emit('feedback', 'Processing audio...');
+			convertToWav(resultArrayYoutubeId[1]);
+		}
 	});
 }
 

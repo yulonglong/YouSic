@@ -1043,6 +1043,8 @@ public class JFCMainClient extends JFrame implements ActionListener, WindowListe
 						if (listOfFiles[i].isFile()) {
 							String filename = listOfFiles[i].getName();
 							if (filename.equals(ytdurl.getYoutubeId()+".AUDIO.mp4")) {
+								// This stdout is needed by the node.js server to continue the process.
+								// Please only change this if you know what you are doing
 								System.out.println("#info - " + ytdurl.getYoutubeId() + " already downloaded");
 								System.exit(1);
 							}

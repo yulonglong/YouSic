@@ -13,19 +13,38 @@ io.on('connection', function(socket){
 	socket.on('youtube_url', function(url){
 		io.emit('feedback', 'Downloading...');
 
-		// After receiving data from client
 		console.log('Server receive : ' + url);
-		var exec = require('child_process').exec;
-		var cmd = 'java -jar VideoDownloader/ytd.jar ' + url;
-		exec(cmd, function(error, stdout, stderr) {
-			console.log(stdout);
-			io.emit('completed', 'Download completed!');
-		});
-		// end
-
+		downloadYoutube(url);
 	});
 });
 
 http.listen(3000, function(){
 	console.log('listening on *:3000');
 });
+
+
+// Download Youtube Video function
+function downloadYoutube(url) {
+	var exec = require('child_process').exec;
+	var cmd = 'java -jar VideoDownloader/ytd.jar ' + url;
+	exec(cmd, function(error, stdout, stderr) {
+		console.log(stdout);
+
+		// Regex the youtube id from stdout
+		var myRegex = new RegExp("#info\\s-\\sYoutubeId\\s=\\s(.+)\\r\\n", "g");
+		var myArray = myRegex.exec(stdout);
+		
+		io.emit('feedback', 'Processing audio...');
+		convertToWav(myArray[1]);	
+	});
+}
+
+// Use ffmpeg to convert to wav audio
+function convertToWav(youtubeId) {
+	var exec = require('child_process').exec;
+	var cmd = 'for %n in (cache/'+youtubeId+'/'+youtubeId+'.AUDIO.mp4) do ffmpeg -i "%n" -ac 1 -map_metadata -1 -ar 44100 "cache/'+youtubeId+'/%~nn.wav"';
+	exec(cmd, function(error, stdout, stderr) {
+		console.log(stderr);
+		io.emit('completed', 'Download completed!');
+	});
+}

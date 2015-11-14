@@ -1006,24 +1006,39 @@ public class JFCMainClient extends JFrame implements ActionListener, WindowListe
 
 				// Create a folder named the youtube id
 				YoutubeUrl ytdurl = new YoutubeUrl("",JFCMainClient.getFirstYoutubeUrlFromList().getUrl());
+				shomedir = shomedir + "\\cache";
+
+				File cacheDir = new File(shomedir);
+				// if the directory does not exist, create it
+				if (!cacheDir.exists()) {
+					try {
+						cacheDir.mkdir();
+					} 
+					catch(SecurityException se){
+						se.printStackTrace();
+					}
+				}
+
 				shomedir = shomedir + "\\" + ytdurl.getYoutubeId();
 				JFCMainClient.currentYoutubeDir = shomedir;
 
-				File theDir = new File(shomedir);
+				// This stdout is needed by the node.js server to continue the process.
+				// Please only change this if you know what you are doing
+				System.out.println("#info - YoutubeId = " + ytdurl.getYoutubeId());
+
+				File currVideoDir = new File(shomedir);
 
 				// if the directory does not exist, create it
-				if (!theDir.exists()) {
-					boolean result = false;
+				if (!currVideoDir.exists()) {
 					try{
-						theDir.mkdir();
-						result = true;
+						currVideoDir.mkdir();
 					} 
 					catch(SecurityException se){
 						se.printStackTrace();
 					}
 				}
 				else {
-					File[] listOfFiles = theDir.listFiles();
+					File[] listOfFiles = currVideoDir.listFiles();
 					for (int i = 0; i < listOfFiles.length; i++) {
 						if (listOfFiles[i].isFile()) {
 							String filename = listOfFiles[i].getName();

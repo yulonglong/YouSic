@@ -294,6 +294,10 @@
     <script>
       var socket = io();
       $('form').submit(function(){
+        if (($('#m').val()) == '') {
+            document.getElementById("feedback").innerHTML = "Please enter a youtube url into the box above!";
+            return false;
+        }
         socket.emit('youtube_url', $('#m').val());
         // $('#m').val('');
         return false;

@@ -768,11 +768,15 @@ public class YTDownloadThread extends Thread {
 						//TODO  catch must not be empty
 					}
 					
-					this.setTitle( this.getTitle()
-							.concat(JFCMainClient.isSaveIdInFilename()?"."+this.nextVideoUrl.get(0).getYoutubeId():"")
-							.concat(!this.nextVideoUrl.get(0).getRespart().equals("")?"."+this.nextVideoUrl.get(0).getRespart():""));
+					if (JFCMainClient.isSaveIdInFilename()) {
+						this.setTitle(this.nextVideoUrl.get(0).getYoutubeId().concat(!this.nextVideoUrl.get(0).getRespart().equals("")?"."+this.nextVideoUrl.get(0).getRespart():""));
+					}
+					else {
+						this.setTitle(this.getTitle().concat(!this.nextVideoUrl.get(0).getRespart().equals("")?"."+this.nextVideoUrl.get(0).getRespart():""));
+					}
 					// java.lang.ArrayIndexOutOfBoundsException would be thrown here if no known resolution was found until here
 
+					JFCMainClient.currentYoutubeTitle = this.getTitle();
 				}
 				
 				if (this.recursionCount==0 && line.matches("(.*)<meta name=\"title\" content=(.*)")) {

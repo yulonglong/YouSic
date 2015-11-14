@@ -96,6 +96,9 @@ import org.apache.commons.configuration.XMLConfiguration;
  */
 public class JFCMainClient extends JFrame implements ActionListener, WindowListener, DocumentListener, ChangeListener, DropTargetListener, ItemListener {
 	public static final String VERSION = "V20150609_2340 by MrKnödelmann";
+
+	public static String currentYoutubeDir = "";
+	public static String currentYoutubeTitle = "";
 	
 	private static final long serialVersionUID = 6791957129816930254L;
 
@@ -180,28 +183,28 @@ public class JFCMainClient extends JFrame implements ActionListener, WindowListe
 	static Options CLI_OPTIONS = new Options();
 	
 	
-    class PopupListener extends MouseAdapter {
-        JPopupMenu popup;
+	class PopupListener extends MouseAdapter {
+		JPopupMenu popup;
  
-        PopupListener(JPopupMenu popupMenu) {
-            this.popup = popupMenu;
-        }
+		PopupListener(JPopupMenu popupMenu) {
+			this.popup = popupMenu;
+		}
  
-        public void mousePressed(MouseEvent e) {
-            maybeShowPopup(e);
-        }
+		public void mousePressed(MouseEvent e) {
+			maybeShowPopup(e);
+		}
  
-        public void mouseReleased(MouseEvent e) {
-            maybeShowPopup(e);
-        }
+		public void mouseReleased(MouseEvent e) {
+			maybeShowPopup(e);
+		}
  
-        private void maybeShowPopup(MouseEvent e) {
-            if (e.isPopupTrigger()) {
-                this.popup.show(e.getComponent(),
-                           e.getX(), e.getY());
-            }
-        }
-    }
+		private void maybeShowPopup(MouseEvent e) {
+			if (e.isPopupTrigger()) {
+				this.popup.show(e.getComponent(),
+						   e.getX(), e.getY());
+			}
+		}
+	}
 	
 	static {
 		initializeOptions();
@@ -913,28 +916,28 @@ public class JFCMainClient extends JFrame implements ActionListener, WindowListe
 		
 		
 		//...where the GUI is constructed:
-	    //Create the popup menu.
-	    this.popup = new JPopupMenu();
-	    JMenuItem menuItem = new JMenuItem(isGerman()?"Zwischenablage in Textfeld einfügen":"Paste Clipboard into textfield");
-	    menuItem.setActionCommand("paste");
-	    menuItem.addActionListener(this);
-	    this.popup.add(menuItem);
-	    menuItem = new JMenuItem(isGerman()?"Textfeld Löschen!":"Clear textfield!");
-	    menuItem.setActionCommand("clear");
-	    menuItem.addActionListener(this);
-	    this.popup.add(menuItem);
-	    this.popup.addSeparator();
-	    menuItem = new JMenuItem(isGerman()?"Meldungen Kopieren":"Copy Messages");
-	    menuItem.setActionCommand("debug");
-	    menuItem.addActionListener(this);
-	    this.popup.add(menuItem);
-	    
-	    //Add listener to components that can bring up popup menus.
-	    MouseListener popupListener = new PopupListener(this.popup);
-	    this.textInputField.addMouseListener(popupListener);
-	    this.textArea.addMouseListener(popupListener);
-	    this.panel.addMouseListener(popupListener);
-	    this.urlList.addMouseListener(popupListener);
+		//Create the popup menu.
+		this.popup = new JPopupMenu();
+		JMenuItem menuItem = new JMenuItem(isGerman()?"Zwischenablage in Textfeld einfügen":"Paste Clipboard into textfield");
+		menuItem.setActionCommand("paste");
+		menuItem.addActionListener(this);
+		this.popup.add(menuItem);
+		menuItem = new JMenuItem(isGerman()?"Textfeld Löschen!":"Clear textfield!");
+		menuItem.setActionCommand("clear");
+		menuItem.addActionListener(this);
+		this.popup.add(menuItem);
+		this.popup.addSeparator();
+		menuItem = new JMenuItem(isGerman()?"Meldungen Kopieren":"Copy Messages");
+		menuItem.setActionCommand("debug");
+		menuItem.addActionListener(this);
+		this.popup.add(menuItem);
+		
+		//Add listener to components that can bring up popup menus.
+		MouseListener popupListener = new PopupListener(this.popup);
+		this.textInputField.addMouseListener(popupListener);
+		this.textArea.addMouseListener(popupListener);
+		this.panel.addMouseListener(popupListener);
+		this.urlList.addMouseListener(popupListener);
 		
 		this.quitButton = new JButton( "" ,createImageIcon("/resources/zsk/images/exit.png",""));		
 		gbc.gridx = 2;
@@ -1000,6 +1003,27 @@ public class JFCMainClient extends JFrame implements ActionListener, WindowListe
 			if (CONFIG.getProperty("savefolder")==null) {
 				// set initial download folder to users homedir
 				String shomedir = System.getProperty("user.dir"); // for CLI-only run
+
+				// Create a folder named the youtube id
+				YoutubeUrl ytdurl = new YoutubeUrl("",JFCMainClient.getFirstYoutubeUrlFromList().getUrl());
+				shomedir = shomedir + "\\" + ytdurl.getYoutubeId();
+				JFCMainClient.currentYoutubeDir = shomedir;
+
+				File theDir = new File(shomedir);
+
+				// if the directory does not exist, create it
+				if (!theDir.exists()) {
+					boolean result = false;
+					try{
+						theDir.mkdir();
+						result = true;
+					} 
+					catch(SecurityException se){
+						se.printStackTrace();
+					}
+				}
+				// end folder creation
+
 				if (!shomedir.endsWith(System.getProperty("file.separator")))
 					shomedir += System.getProperty("file.separator");
 				CONFIG.setProperty("savefolder", shomedir);
@@ -1100,17 +1124,17 @@ public class JFCMainClient extends JFrame implements ActionListener, WindowListe
 		JFCMainClient.ARGS = args;
 		if (args.length>0) {
 			Runtime.getRuntime().addShutdownHook(new Thread() {
-			    public void run() { 
-			    	debugOutput("shutdown hook handler. (cli only)");
-			    	if (JFCMainClient.FRAME == null) {
-			    		JFCMainClient.shutdownApp();
-			    	}
-			    	debugOutput("shutdown hook handler. end run()");
-			    }
+				public void run() { 
+					debugOutput("shutdown hook handler. (cli only)");
+					if (JFCMainClient.FRAME == null) {
+						JFCMainClient.shutdownApp();
+					}
+					debugOutput("shutdown hook handler. end run()");
+				}
 			});
 			
 			IS_CLI = true;
-			SAVE_ID_IN_FILENAME = true;
+			setSaveIdInFilename(true);
 			runCLI();			
 		} else {
 			try {
@@ -1320,23 +1344,23 @@ public class JFCMainClient extends JFrame implements ActionListener, WindowListe
 
 		// let a thread update the textfield in the UI
 		Thread worker = new Thread() {
-            public void run() {
-            	synchronized (JFCMainClient.FRAME.textInputField) {
-            		JFCMainClient.FRAME.textInputField.setText(fs);
+			public void run() {
+				synchronized (JFCMainClient.FRAME.textInputField) {
+					JFCMainClient.FRAME.textInputField.setText(fs);
 				}
-            }
-        };
-        SwingUtilities.invokeLater (worker);
+			}
+		};
+		SwingUtilities.invokeLater (worker);
 	} 
 	
 	ImageIcon createImageIcon(String path, String description) {
-	    URL imgURL = getClass().getResource(path);
-	    if (imgURL != null) {
-	        return new ImageIcon(imgURL, description);
-	    } else {
-	        System.err.println("Couldn't find file: " + path);
-	        return null;
-	    }
+		URL imgURL = getClass().getResource(path);
+		if (imgURL != null) {
+			return new ImageIcon(imgURL, description);
+		} else {
+			System.err.println("Couldn't find file: " + path);
+			return null;
+		}
 	} 
 
 	public void stateChanged(ChangeEvent e) {
@@ -1452,6 +1476,14 @@ public class JFCMainClient extends JFrame implements ActionListener, WindowListe
 				output("trying: normal 2D");
 			}
 
-	} 
+	}
+
+	public static String getCurrentYoutubeDirectory() {
+		return currentYoutubeDir;
+	}
+
+	public static String getCurrentYoutubeTitle() {
+		return currentYoutubeTitle;
+	}
 	
 } 

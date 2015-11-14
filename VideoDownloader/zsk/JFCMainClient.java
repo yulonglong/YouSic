@@ -713,6 +713,9 @@ public class JFCMainClient extends JFrame implements ActionListener, WindowListe
 		try {
 			return(JFCMainClient.FRAME.audioOnly);
 		} catch (NullPointerException npe) {
+			if (IS_CLI) {
+				return (true);
+			}
 			return(false);
 		}
 	} 
@@ -1107,6 +1110,7 @@ public class JFCMainClient extends JFrame implements ActionListener, WindowListe
 			});
 			
 			IS_CLI = true;
+			SAVE_ID_IN_FILENAME = true;
 			runCLI();			
 		} else {
 			try {

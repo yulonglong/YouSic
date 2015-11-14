@@ -16,7 +16,7 @@ io.on('connection', function(socket){
     // After receiving data from client
     console.log('Server receive : ' + url);
     var exec = require('child_process').exec;
-	var cmd = 'java -jar VideoDownloader/runytd2.jar ' + url;
+	var cmd = 'java -jar VideoDownloader/ytd.jar ' + url;
 	exec(cmd, function(error, stdout, stderr) {
 	  console.log(stdout);
 	});

@@ -11,7 +11,7 @@ app.get('/', function(req, res){
 
 io.on('connection', function(socket){
 	socket.on('youtube_url', function(url){
-		io.emit('feedback', 'Downloading...');
+		io.emit('feedback', 'Downloading video...');
 		io.emit('clear-result', 'clear');
 
 		console.log('Server receive : ' + url);
@@ -34,6 +34,11 @@ function downloadYoutube(url) {
 		// Regex the youtube id from stdout
 		var regexYoutubeId = new RegExp("#info\\s-\\sYoutubeId\\s=\\s(.+)\\r\\n", "g");
 		var resultArrayYoutubeId = regexYoutubeId.exec(stdout);
+
+		if (resultArrayYoutubeId == null) {
+			io.emit('completed', 'Invalid URL!');
+			return;
+		}
 
 		// Regex the youtube id from stdout
 		var regexAlreadyDownloaded = new RegExp("#info\\s-\\s"+resultArrayYoutubeId[1]+"\\salready\\sdownloaded\\r\\n", "g");
@@ -95,7 +100,7 @@ function callMatcher(youtubeId) {
 			songArray.push(decodeURIComponent(matches[6]));
 		}
 		if (songArray.length == 0) {
-			io.emit('completed', 'No music detected!');
+			io.emit('completed', 'Sorry, no music detected!');
 		}
 		else  {
 			io.emit('completed', 'List of music detected');

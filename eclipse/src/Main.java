@@ -19,8 +19,8 @@ import Tool.Timer;
 
 public class Main {
 
-	private static final double MFCC_SIMILARITY_THRESHOLD = 0.98;
-	private static final double MFCC_ACCEPTANCE_THRESHOLD = 0.98;
+	private static final double MFCC_SIMILARITY_THRESHOLD = 0.985;
+	private static final double MFCC_ACCEPTANCE_THRESHOLD = 0.985;
 	private static final int FRAME_COUNT_ACCEPTANCE_THRESHOLD = 15; // Multiply by 0.75 secs for actual length.
 
 	private static final FilenameFilter WAV_EXTENSION_FILTER = new FilenameFilter() {
@@ -45,11 +45,16 @@ public class Main {
 			System.err.println("Usage: java -Xmx8000M -jar YouSicMatcher.jar pathToSongDatabase pathToWaveFile");
 			System.exit(1);
 		}
+
 		//Notes for input: input should be 44100 Hz, Mono, 16-bit per sample. Remove metadata too.
 
-		// ~6 second window with ~1.5 secs shift (~4.5 secs overlap)
-		// Actual window = 262144/44100 = ~5.944 secs
+		// ~3 second window with ~0.75 secs shift (~4.5 secs overlap)
+		// Actual window = 131072/44100 = ~2.972 secs
 		MFCC mfcc = new MFCC(131072, 131072/4*3);
+
+		PriorityQueue<Result> results = match(mfcc, args[1], args[0]);
+		printProductionOutput(results, 131072.0/4.0/44100.0);
+
 
 //		ObjectIO.writeObject("C:/Users/Ian/Google Drive/Music/TestcaseVideo/tc1.db", generateSongObject(mfcc, "C:/Users/Ian/Google Drive/Music/TestcaseVideo/tc1.wav"));
 //		ObjectIO.writeObject("C:/Users/Ian/Google Drive/Music/TestcaseVideo/tc2.db", generateSongObject(mfcc, "C:/Users/Ian/Google Drive/Music/TestcaseVideo/tc2.wav"));
@@ -60,12 +65,11 @@ public class Main {
 
 		//createSongsDatabase(mfcc, "C:/Users/Ian/Google Drive/Music/wav", "C:/Users/Ian/Desktop/songs.db");
 		//createSongsDatabase(mfcc, "C:/Users/Ian/Google Drive/Music/Testcase_wav", "C:/Users/Ian/Desktop/songs.db");
-		//mergeSongsDatabase("C:/Users/Ian/Desktop/songs.db");
+//		mergeSongsDatabase("C:/Users/Ian/Desktop/songs.db");
 //		match(mfcc, "C:/Users/Ian/Google Drive/Music/TestcaseVideo/tc3.wav", "C:/Users/Ian/Desktop/songs2.db");
 //		PriorityQueue<Result> results = match(mfcc, "C:/Users/Ian/Desktop/test3.wav", "C:/Users/Ian/Desktop/songs2.db");
 
-		PriorityQueue<Result> results = match(mfcc, args[1], args[0]);
-		printProductionOutput(results, 131072.0/4.0/44100.0);
+
 	}
 
 	private static void createSongsDatabase(MFCC mfcc, String folderPath, String databaseFilePath) throws FileNotFoundException, IOException {
@@ -195,10 +199,13 @@ public class Main {
 //		System.out.println("Flatten: " + results.size());
 
 		String songName = results.peek().getSong();
+		double lowerThreshold = results.peek().getMfcc() - 0.002;
 
 		double mfccScores[] = new double[sampleLength];
 		while(!results.isEmpty()) {
 			Result r = results.poll();
+			if(r.getMfcc() < lowerThreshold)
+				continue;
 //			System.out.println(r);
 			for(int i = 0; i < r.getLength(); i++) {
 				if(mfccScores[r.getSampleStartPosition() + i] == 0.0) {
@@ -259,7 +266,7 @@ public class Main {
 				}
 			}
 
-			if((double) hitCount / r.getLength() >= 0.7) {
+			if((double) hitCount / r.getLength() >= 0.6) {
 				r.setSampleStartPosition(firstHitPosition);
 				r.setLength(hitCount);
 				acceptedResults.add(r);
@@ -283,8 +290,6 @@ public class Main {
 
 			System.out.println(startMin + " " + startSec + " " + endMin + " " + endSec + " " + r.getSong());
 		}
-
-		System.out.println("-1 -1 -1 -1 END");
 	}
 
 	private static Song generateSongObject(MFCC mfcc, String filename) {

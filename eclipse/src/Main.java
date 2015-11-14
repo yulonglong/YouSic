@@ -214,7 +214,6 @@ public class Main {
 		int totalMfccCount = 0;
 		int i;
 		for(i = 0; i < mfccScores.length; i++) {
-
 			if(mfccScores[i] == 0.0) {
 				if(totalMfccCount != 0) {
 					//new Result(mfcc, songStartPosition, sampleStartPosition, length, song)
@@ -230,7 +229,7 @@ public class Main {
 		}
 
 		if(totalMfccCount != 0) {
-			results.add(new Result(totalMfccScore / totalMfccCount, -1, i, totalMfccCount, songName));
+			results.add(new Result(totalMfccScore / totalMfccCount, -1, i - totalMfccCount, totalMfccCount, songName));
 			totalMfccScore = 0.0;
 			totalMfccCount = 0;
 		}
@@ -245,7 +244,6 @@ public class Main {
 		while(!results.isEmpty()) {
 			Result r = results.poll();
 
-			int missCount = 0;
 			int hitCount = 0;
 			int firstHitPosition = -1;
 			for(int i = 0; i < r.getLength(); i++) {
@@ -256,14 +254,8 @@ public class Main {
 					hitCount++;
 					isOccupied[r.getSampleStartPosition() + i] = true;
 				}
-				else {
-					if(hitCount == 0) {
-						missCount++;
-					}
-					else {
-						missCount += r.getLength() - i;
-						break;
-					}
+				else if(hitCount != 0) {
+					break;
 				}
 			}
 
@@ -291,6 +283,8 @@ public class Main {
 
 			System.out.println(startMin + " " + startSec + " " + endMin + " " + endSec + " " + r.getSong());
 		}
+
+		System.out.println("-1 -1 -1 -1 END");
 	}
 
 	private static Song generateSongObject(MFCC mfcc, String filename) {

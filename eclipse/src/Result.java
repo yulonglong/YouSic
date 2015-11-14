@@ -1,3 +1,4 @@
+import java.util.Comparator;
 
 class Result implements Comparable<Result> {
 	private double mfcc;
@@ -5,6 +6,8 @@ class Result implements Comparable<Result> {
 	private int sampleStartPosition;
 	private int length;
 	private String song;
+
+	public static final SampleStartTimeComparator SAMPLE_START_TIME_COMPARATOR = new SampleStartTimeComparator();
 
 	public Result(double mfcc, int songStartPosition, int sampleStartPosition, int length, String song) {
 		this.mfcc = mfcc;
@@ -65,5 +68,12 @@ class Result implements Comparable<Result> {
 
 	public void setSong(String song) {
 		this.song = song;
+	}
+
+	private static class SampleStartTimeComparator implements Comparator<Result> {
+	    @Override
+	    public int compare(Result a, Result b) {
+	        return Integer.compare(a.getSampleStartPosition(), b.getSampleStartPosition());
+	    }
 	}
 }

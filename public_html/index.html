@@ -99,6 +99,7 @@
                     <br/>
                     <img id="loading-animation" src="img/cube.gif" style="padding-top:10px;padding-bottom:10px;width:70px;height:=90px;visibility:hidden" />
                     <h2 id="feedback"></h2>
+                    <ul style="display: inline-block; text-align: left;" id="result"></ul>
              
                     <!-- <a href="#" class="btn btn-default btn-xl">Go!</a> -->
                 </div>
@@ -309,6 +310,12 @@
       socket.on('completed', function(msg){
         document.getElementById("loading-animation").style.visibility = "hidden";
         document.getElementById("feedback").innerHTML = (msg);
+      });
+      socket.on('add-result', function(msg){
+        $('#result').append($('<li>').text(msg));
+      });
+      socket.on('clear-result', function(msg){
+        $('#result').empty();
       });
     </script>
 

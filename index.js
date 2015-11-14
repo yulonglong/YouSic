@@ -12,6 +12,7 @@ app.get('/', function(req, res){
 io.on('connection', function(socket){
 	socket.on('youtube_url', function(url){
 		io.emit('feedback', 'Downloading...');
+		io.emit('clear-result', 'clear');
 
 		console.log('Server receive : ' + url);
 		downloadYoutube(url);
@@ -39,7 +40,8 @@ function downloadYoutube(url) {
 		var isAlreadyDownloaded = regexAlreadyDownloaded.test(stdout);
 
 		if (isAlreadyDownloaded == true) {
-			io.emit('completed', 'Download completed!');
+			io.emit('feedback', 'Analysing music...');
+			callMatcher(resultArrayYoutubeId[1]);
 		}
 		else {
 			io.emit('feedback', 'Processing audio...');
@@ -53,7 +55,55 @@ function convertToWav(youtubeId) {
 	var exec = require('child_process').exec;
 	var cmd = 'for %n in (cache/'+youtubeId+'/'+youtubeId+'.AUDIO.mp4) do ffmpeg -i "%n" -ac 1 -map_metadata -1 -ar 44100 "cache/'+youtubeId+'/%~nn.wav"';
 	exec(cmd, function(error, stdout, stderr) {
-		console.log(stderr);
-		io.emit('completed', 'Download completed!');
+		io.emit('feedback', 'Analysing music...');
+		callMatcher(youtubeId);
+	});
+}
+
+function callMatcher(youtubeId) {
+	var exec = require('child_process').exec;
+	var cmd = 'java -Xmx8000M -jar ./matcher/YouSicMatcher.jar ./matcher/songs.db ./cache/'+youtubeId+'/'+youtubeId+'.AUDIO.wav';
+	exec(cmd, function(error, stdout, stderr) {
+
+		var startMinArray = [];
+		var startSecArray = [];
+		var endMinArray = [];
+		var endSecArray = [];
+		var artistArray = [];
+		var songArray = [];
+		var matches;
+
+		// Regex the youtube id from stdout
+		var regexMatchedSongs = new RegExp("([0-9]+)\\s([0-9]+)\\s([0-9]+)\\s([0-9]+)\\s(.+)\\s-\\s(.+)\\r\\n", "g");
+
+		while (matches = regexMatchedSongs.exec(stdout)) {
+			startMinArray.push(decodeURIComponent(matches[1]));
+			if (matches[2].length == 1) {
+				startSecArray.push('0'+decodeURIComponent(matches[2]));
+			}
+			else {
+				startSecArray.push(decodeURIComponent(matches[2]));
+			}
+			endMinArray.push(decodeURIComponent(matches[3]));
+			if (matches[4].length == 1) {
+				endSecArray.push('0'+decodeURIComponent(matches[4]));
+			}
+			else {
+				endSecArray.push(decodeURIComponent(matches[4]));
+			}
+			artistArray.push(decodeURIComponent(matches[5]));
+			songArray.push(decodeURIComponent(matches[6]));
+		}
+		if (songArray.length == 0) {
+			io.emit('completed', 'No music detected!');
+		}
+		else  {
+			io.emit('completed', 'List of music detected');
+			console.log("Music detected:");
+			for(var i=0;i<songArray.length;i++) {
+				io.emit('add-result', startMinArray[i]+':'+startSecArray[i]+" - "+endMinArray[i]+':'+endSecArray[i]+" --- "+artistArray[i]+" - "+songArray[i]);
+				console.log(startMinArray[i]+':'+startSecArray[i]+" - "+endMinArray[i]+':'+endSecArray[i]+" --- "+artistArray[i]+" - "+songArray[i]);
+			}
+		}
 	});
 }

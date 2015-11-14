@@ -16,7 +16,7 @@ ffmpeg -loop 1 -i img.jpg -i audio.wav -c:v libx264 -c:a aac -strict experimenta
 Test Video Links (Timings close approximation, if avaliable)
 ============================================================
 
-https://youtu.be/CyhFHn-d_V8
+https://www.youtube.com/watch?v=CyhFHn-d_V8
 5 songs, approximately 15 secs per song, in this order:
 --
 Avril Lavigne - Black Star
@@ -25,7 +25,7 @@ Bill Haley & The Comets - Rock Around The Clock
 Bobby Darin - Splish Splash
 Carl Perkins - Blue Suede Shoes - Carl Perkins 1956
 
-https://youtu.be/_K5HkPQQvrk
+https://www.youtube.com/watch?v=_K5HkPQQvrk
 5 songs, approximately 15 secs per song, in this order:
 --
 Boys Like Girls - Hells Over Head

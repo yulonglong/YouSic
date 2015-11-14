@@ -312,7 +312,7 @@
         document.getElementById("feedback").innerHTML = (msg);
       });
       socket.on('add-result', function(msg){
-        $('#result').append($('<li>').text(msg));
+        $('#result').append(msg);
       });
       socket.on('clear-result', function(msg){
         $('#result').empty();

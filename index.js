@@ -101,7 +101,15 @@ function callMatcher(youtubeId) {
 			io.emit('completed', 'List of music detected');
 			console.log("Music detected:");
 			for(var i=0;i<songArray.length;i++) {
-				io.emit('add-result', startMinArray[i]+':'+startSecArray[i]+" - "+endMinArray[i]+':'+endSecArray[i]+" --- "+artistArray[i]+" - "+songArray[i]);
+				io.emit('add-result', 
+					'<li>' +
+					startMinArray[i]+':'+startSecArray[i]+" - "+endMinArray[i]+':'+endSecArray[i]+" --- "+artistArray[i]+" - "+songArray[i]+
+					'&nbsp;'+
+					'<a href="https://play.spotify.com/search/'+artistArray[i].replace(/\s/g, '%20')+'%20'+songArray[i].replace(/\s/g, '%20')+'">' +
+					'<img src="img/spotify-connect.png"  style="height:30px;">' +
+				 	'</a>' +
+				 	'</li>');
+
 				console.log(startMinArray[i]+':'+startSecArray[i]+" - "+endMinArray[i]+':'+endSecArray[i]+" --- "+artistArray[i]+" - "+songArray[i]);
 			}
 		}

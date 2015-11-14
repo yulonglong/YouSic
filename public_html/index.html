@@ -96,6 +96,10 @@
                       <button class="btn btn-default btn-xl">Go!</button>
                     </form>
 
+                    <br/>
+                    <img id="loading-animation" src="img/cube.gif" style="padding-top:10px;padding-bottom:10px;width:70px;height:=90px;visibility:hidden" />
+                    <h2 id="feedback"></h2>
+             
                     <!-- <a href="#" class="btn btn-default btn-xl">Go!</a> -->
                 </div>
             </div>
@@ -294,9 +298,14 @@
         // $('#m').val('');
         return false;
       });
-      // socket.on('youtube_url', function(msg){
-      //   $('#messages').append($('<li>').text(msg));
-      // });
+      socket.on('feedback', function(msg){
+        document.getElementById("loading-animation").style.visibility = "visible";
+        document.getElementById("feedback").innerHTML = (msg);
+      });
+      socket.on('completed', function(msg){
+        document.getElementById("loading-animation").style.visibility = "hidden";
+        document.getElementById("feedback").innerHTML = (msg);
+      });
     </script>
 
 </body>

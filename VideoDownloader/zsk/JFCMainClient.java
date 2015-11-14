@@ -1022,6 +1022,18 @@ public class JFCMainClient extends JFrame implements ActionListener, WindowListe
 						se.printStackTrace();
 					}
 				}
+				else {
+					File[] listOfFiles = theDir.listFiles();
+					for (int i = 0; i < listOfFiles.length; i++) {
+						if (listOfFiles[i].isFile()) {
+							String filename = listOfFiles[i].getName();
+							if (filename.equals(ytdurl.getYoutubeId()+".AUDIO.mp4")) {
+								System.out.println("#info - " + ytdurl.getYoutubeId() + " already downloaded");
+								System.exit(1);
+							}
+						}
+					}
+				}
 				// end folder creation
 
 				if (!shomedir.endsWith(System.getProperty("file.separator")))

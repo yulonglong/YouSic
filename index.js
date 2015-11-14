@@ -6,25 +6,26 @@ var io = require('socket.io')(http);
 app.use(express.static(__dirname + '/public_html'));
 
 app.get('/', function(req, res){
-  res.sendFile(__dirname + '/public_html/index.html');
+	res.sendFile(__dirname + '/public_html/index.html');
 });
 
 io.on('connection', function(socket){
-  socket.on('youtube_url', function(url){
-    io.emit('youtube_url', url);
+	socket.on('youtube_url', function(url){
+		io.emit('feedback', 'Downloading...');
 
-    // After receiving data from client
-    console.log('Server receive : ' + url);
-    var exec = require('child_process').exec;
-	var cmd = 'java -jar VideoDownloader/ytd.jar ' + url;
-	exec(cmd, function(error, stdout, stderr) {
-	  console.log(stdout);
+		// After receiving data from client
+		console.log('Server receive : ' + url);
+		var exec = require('child_process').exec;
+		var cmd = 'java -jar VideoDownloader/ytd.jar ' + url;
+		exec(cmd, function(error, stdout, stderr) {
+			console.log(stdout);
+			io.emit('completed', 'Download completed!');
+		});
+		// end
+
 	});
-	// end
-
-  });
 });
 
 http.listen(3000, function(){
-  console.log('listening on *:3000');
+	console.log('listening on *:3000');
 });

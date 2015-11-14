@@ -9,7 +9,7 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>Creative - Start Bootstrap Theme</title>
+    <title>YouSic - Youtube Music Recognizer</title>
 
     <!-- Bootstrap Core CSS -->
     <link rel="stylesheet" href="css/bootstrap.min.css" type="text/css">
@@ -89,7 +89,18 @@
                     <h2 class="section-heading">Recognize Your Music</h2>
                     <hr class="light">
                     <p class="text-faded">Copy and paste any youtube link below and find out the music titles being played!</p>
-                    <a href="#" class="btn btn-default btn-xl">Go!</a>
+
+                    <form action="" >
+                      <input id="m" placeholder="Paste youtube URL here" autocomplete="off" class="bootstrap-frm"/>
+                      <br/><br/>
+                      <button class="btn btn-default btn-xl">Go!</button>
+                    </form>
+
+                    <br/>
+                    <img id="loading-animation" src="img/cube.gif" style="padding-top:10px;padding-bottom:10px;width:70px;height:=90px;visibility:hidden" />
+                    <h2 id="feedback"></h2>
+             
+                    <!-- <a href="#" class="btn btn-default btn-xl">Go!</a> -->
                 </div>
             </div>
         </div>
@@ -254,11 +265,11 @@
                 </div>
                 <div class="col-lg-4 col-lg-offset-2 text-center">
                     <i class="fa fa-phone fa-3x wow bounceIn"></i>
-                    <p>6516-2774</p>
+                    <p>6516-2505</p>
                 </div>
                 <div class="col-lg-4 text-center">
                     <i class="fa fa-envelope-o fa-3x wow bounceIn" data-wow-delay=".1s"></i>
-                    <p><a href="yulonglong2005@gmail.com">feedback@startbootstrap.com</a></p>
+                    <p><a href="yulonglong2005@gmail.com">feedback@YouSic.com</a></p>
                 </div>
             </div>
         </div>
@@ -277,6 +288,29 @@
 
     <!-- Custom Theme JavaScript -->
     <script src="js/creative.js"></script>
+
+    <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
+    <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
+    <script>
+      var socket = io();
+      $('form').submit(function(){
+        if (($('#m').val()) == '') {
+            document.getElementById("feedback").innerHTML = "Please enter a youtube url into the box above!";
+            return false;
+        }
+        socket.emit('youtube_url', $('#m').val());
+        // $('#m').val('');
+        return false;
+      });
+      socket.on('feedback', function(msg){
+        document.getElementById("loading-animation").style.visibility = "visible";
+        document.getElementById("feedback").innerHTML = (msg);
+      });
+      socket.on('completed', function(msg){
+        document.getElementById("loading-animation").style.visibility = "hidden";
+        document.getElementById("feedback").innerHTML = (msg);
+      });
+    </script>
 
 </body>
 

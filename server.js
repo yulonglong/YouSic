@@ -4,6 +4,14 @@ var http = require('http').Server(app);
 var io = require('socket.io')(http);
 var port = process.env.PORT || 1337;
 
+// Azure path
+var javaExec = "\"D:/Program Files (x86)/Java/jdk1.8.0_60/java\"";
+
+// Local path
+if (port == 1337) {
+	javaExec = "java";
+}
+
 app.use(express.static(__dirname + '/public_html'));
 
 app.get('/', function(req, res){
@@ -52,10 +60,22 @@ function downloadYoutube(url) {
 		if (isAlreadyDownloaded == true) {
 			io.emit('feedback-processing', 'Analysing music...');
 			callMatcher(resultArrayYoutubeId[1]);
+			return;
 		}
-		else {
+
+		// Regex the youtube id from stdout
+		var regexDownloadComplete = new RegExp("#info\\s-\\sdownload\\scomplete:\\s\""+resultArrayYoutubeId[1]+".AUDIO\"", "g");
+		var isDownloadComplete = regexDownloadComplete.test(stdout);
+
+		if (isDownloadComplete == true) {
 			io.emit('feedback-processing', 'Processing audio...');
 			convertToWav(resultArrayYoutubeId[1]);
+			return;
+		}
+		else {
+			io.emit('completed-warning', 'Failed to download video!');
+			console.log("------------- End of cycle ----------------\n");
+			return;
 		}
 	});
 }

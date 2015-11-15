@@ -48,7 +48,7 @@ hr.light {
 }
 
 a {
-    color: rgba(255,255,255,.7);
+    color: #f05f40;
     -webkit-transition: all .35s;
     -moz-transition: all .35s;
     transition: all .35s;
@@ -56,8 +56,21 @@ a {
 
 a:hover,
 a:focus {
+    color: #eb3812;
+}
+
+a.video-url {
+    color: rgba(255,255,255,.7);
+    -webkit-transition: all .35s;
+    -moz-transition: all .35s;
+    transition: all .35s;
+}
+
+a.video-url:hover,
+a.video-url:focus {
     color: #00FFFF;
 }
+
 
 h1,
 h2,

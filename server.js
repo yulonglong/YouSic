@@ -65,7 +65,7 @@ function downloadYoutube(url) {
 			var videoId = info['video_id'];
 			io.emit('video-title', info['title']);
 			io.emit('video-url', 
-				'<a href=\"' +
+				'<a class=\"video-url\" href=\"' +
 				'https://www.youtube.com/watch?v=' + videoId +
 				'\">' +
 				'https://www.youtube.com/watch?v=' + videoId +

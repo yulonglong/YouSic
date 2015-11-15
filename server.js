@@ -39,7 +39,7 @@ http.listen(port, function(){
 // Download Youtube Video function
 function downloadYoutube(url) {
 	var exec = require('child_process').exec;
-	var cmd = 'java -jar VideoDownloader/ytd.jar ' + url;
+	var cmd = javaExec + ' -jar VideoDownloader/ytd.jar ' + url;
 	exec(cmd, function(error, stdout, stderr) {
 		console.log(stdout);
 
@@ -92,7 +92,7 @@ function convertToWav(youtubeId) {
 
 function callMatcher(youtubeId) {
 	var exec = require('child_process').exec;
-	var cmd = 'java -Xmx8000M -jar ./matcher/YouSicMatcher.jar ./matcher/songs.db ./cache/'+youtubeId+'/'+youtubeId+'.AUDIO.wav';
+	var cmd = javaExec + ' -Xmx8000M -jar ./matcher/YouSicMatcher.jar ./matcher/songs.db ./cache/'+youtubeId+'/'+youtubeId+'.AUDIO.wav';
 	exec(cmd, function(error, stdout, stderr) {
 
 		var startMinArray = [];

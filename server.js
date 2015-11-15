@@ -5,7 +5,7 @@ var io = require('socket.io')(http);
 var port = process.env.PORT || 1337;
 
 // Azure path
-var javaExec = "\"D:/Program Files (x86)/Java/jdk1.8.0_60/java\"";
+var javaExec = "\"D:/Program Files/Java/jdk1.8.0_60/java\"";
 
 // Local path
 if (port == 1337) {

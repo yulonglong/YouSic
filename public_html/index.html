@@ -296,6 +296,8 @@
       var socket = io();
       $('form').submit(function(){
         if (($('#youtube-url').val()) == '') {
+            $("#feedback-image").attr("src", "img/warning.png");
+            document.getElementById("feedback-image").style.visibility = "visible";
             document.getElementById("feedback").innerHTML = "Please enter a youtube url into the box above!";
             return false;
         }

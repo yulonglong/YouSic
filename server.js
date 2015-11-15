@@ -52,22 +52,28 @@ function downloadYoutube(url) {
 	var fs     = require('fs');
 	var ytdl   = require('ytdl-core');
 
-	ytdl.getInfo(url, function(err, info) {
-  		var videoId = info['video_id'];
-  		var dir = './cache';
-		if (fs.existsSync(dir + '/'+videoId+'.wav')) {
-		    io.emit('feedback-processing', 'Analysing music...');
- 			callMatcher(videoId);
-		}
-		else {
-	  		var audioOutput = path.resolve(__dirname + '/cache' , videoId+'.mp4');
-			ytdl(url, { quality: 140 }).pipe(fs.createWriteStream(audioOutput))
-			.on('finish', function() {
-				io.emit('feedback-processing', 'Processing audio...');
- 				convertToWav(videoId);
- 			});
-		}
-  	});
+	try {
+		ytdl.getInfo(url, function(err, info) {
+	  		var videoId = info['video_id'];
+	  		var dir = './cache';
+			if (fs.existsSync(dir + '/'+videoId+'.wav')) {
+			    io.emit('feedback-processing', 'Analysing music...');
+	 			callMatcher(videoId);
+			}
+			else {
+		  		var audioOutput = path.resolve(__dirname + '/cache' , videoId+'.mp4');
+				ytdl(url, { quality: 140 }).pipe(fs.createWriteStream(audioOutput))
+				.on('finish', function() {
+					io.emit('feedback-processing', 'Processing audio...');
+	 				convertToWav(videoId);
+	 			});
+			}
+	  	});
+	}
+	catch (err) {
+		console.log(err);
+		io.emit('completed-warning', 'Invalid URL!');
+	}
 }
 
 // Use ffmpeg to convert to wav audio

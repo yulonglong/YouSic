@@ -48,16 +48,13 @@ function createCacheFolder() {
 
 // Download Youtube Video function
 function downloadYoutube(url) {
-	var videoId;
 	var path   = require('path');
 	var fs     = require('fs');
 	var ytdl   = require('ytdl-core');
 
 	ytdl.getInfo(url, function(err, info) {
-  		videoId = info['video_id'];
-
+  		var videoId = info['video_id'];
   		var dir = './cache';
-
 		if (fs.existsSync(dir + '/'+videoId+'.wav')) {
 		    io.emit('feedback-processing', 'Analysing music...');
  			callMatcher(videoId);

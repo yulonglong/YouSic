@@ -99,6 +99,9 @@
                     <br/>
                     <img id="feedback-image" style="padding-top:10px;padding-bottom:10px;width:70px;height:=90px;visibility:hidden" />
                     <h2 id="feedback"></h2>
+                    <br/>
+                    <h2 id="video-title"></h2>
+                    <h4 id="video-url"></h4>
                     <ul style="display: inline-block; text-align: left;" id="result"></ul>
              
                     <!-- <a href="#" class="btn btn-default btn-xl">Go!</a> -->
@@ -298,12 +301,12 @@
         if (($('#youtube-url').val()) == '') {
             $("#feedback-image").attr("src", "img/warning.png");
             document.getElementById("feedback-image").style.visibility = "visible";
-            document.getElementById("feedback").innerHTML = "Please enter a youtube url into the box above!";
+            document.getElementById("feedback").innerHTML = "Please enter a youtube URL!";
             return false;
         }
         socket.emit('youtube_url', $('#youtube-url').val());
         document.getElementById("go-button").disabled = true;
-        // $('#youtube-url').val('');
+        $('#youtube-url').val('');
         return false;
       });
       socket.on('feedback-loading', function(msg){
@@ -336,6 +339,12 @@
       });
       socket.on('clear-result', function(msg){
         $('#result').empty();
+      });
+      socket.on('video-title', function(msg){
+        document.getElementById("video-title").innerHTML = (msg);
+      });
+      socket.on('video-url', function(msg){
+        document.getElementById("video-url").innerHTML = (msg);
       });
     </script>
 

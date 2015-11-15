@@ -25,6 +25,9 @@ io.on('connection', function(socket){
 
 		io.emit('feedback-loading', 'Downloading video...');
 		io.emit('clear-result', 'clear');
+		io.emit('video-title','');
+		io.emit('video-url', '');
+
 		console.log('Server receive : ' + url);
 		downloadYoutube(url);
 
@@ -42,7 +45,7 @@ function createCacheFolder() {
 	var dir = './cache';
 
 	if (!fs.existsSync(dir)){
-	    fs.mkdirSync(dir);
+		fs.mkdirSync(dir);
 	}
 }
 
@@ -54,21 +57,34 @@ function downloadYoutube(url) {
 
 	try {
 		ytdl.getInfo(url, function(err, info) {
-	  		var videoId = info['video_id'];
-	  		var dir = './cache';
+			if (info == null ) {
+				io.emit('completed-warning', 'Invalid URL!');
+				return;
+			}
+
+			var videoId = info['video_id'];
+			io.emit('video-title', info['title']);
+			io.emit('video-url', 
+				'<a href=\"' +
+				'https://www.youtube.com/watch?v=' + videoId +
+				'\">' +
+				'https://www.youtube.com/watch?v=' + videoId +
+				'</a>');
+
+			var dir = './cache';
 			if (fs.existsSync(dir + '/'+videoId+'.wav')) {
-			    io.emit('feedback-processing', 'Analysing music...');
-	 			callMatcher(videoId);
+				io.emit('feedback-processing', 'Analysing music...');
+				callMatcher(videoId);
 			}
 			else {
-		  		var audioOutput = path.resolve(__dirname + '/cache' , videoId+'.mp4');
+				var audioOutput = path.resolve(__dirname + '/cache' , videoId+'.mp4');
 				ytdl(url, { quality: 140 }).pipe(fs.createWriteStream(audioOutput))
 				.on('finish', function() {
 					io.emit('feedback-processing', 'Processing audio...');
-	 				convertToWav(videoId);
-	 			});
+					convertToWav(videoId);
+				});
 			}
-	  	});
+		});
 	}
 	catch (err) {
 		console.log(err);

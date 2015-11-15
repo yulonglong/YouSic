@@ -33,58 +33,52 @@ io.on('connection', function(socket){
 
 http.listen(port, function(){
 	console.log('listening on *:'+port);
+	createCacheFolder();
 });
 
 
+function createCacheFolder() {
+	var fs = require('fs');
+	var dir = './cache';
+
+	if (!fs.existsSync(dir)){
+	    fs.mkdirSync(dir);
+	}
+}
+
 // Download Youtube Video function
 function downloadYoutube(url) {
-	var exec = require('child_process').exec;
-	var cmd = javaExec + ' -jar VideoDownloader/ytd.jar ' + url;
-	exec(cmd, function(error, stdout, stderr) {
-		console.log(stdout);
+	var videoId;
+	var path   = require('path');
+	var fs     = require('fs');
+	var ytdl   = require('ytdl-core');
 
-		// Regex the youtube id from stdout
-		var regexYoutubeId = new RegExp("#info\\s-\\sYoutubeId\\s=\\s(.+)\\r\\n", "g");
-		var resultArrayYoutubeId = regexYoutubeId.exec(stdout);
+	ytdl.getInfo(url, function(err, info) {
+  		videoId = info['video_id'];
 
-		if (resultArrayYoutubeId == null) {
-			io.emit('completed-warning', 'Invalid URL!');
-			console.log("------------- End of cycle ----------------\n");
-			return;
-		}
+  		var dir = './cache';
 
-		// Regex the youtube id from stdout
-		var regexAlreadyDownloaded = new RegExp("#info\\s-\\s"+resultArrayYoutubeId[1]+"\\salready\\sdownloaded\\r\\n", "g");
-		var isAlreadyDownloaded = regexAlreadyDownloaded.test(stdout);
-
-		if (isAlreadyDownloaded == true) {
-			io.emit('feedback-processing', 'Analysing music...');
-			callMatcher(resultArrayYoutubeId[1]);
-			return;
-		}
-
-		// Regex the youtube id from stdout
-		var regexDownloadComplete = new RegExp("#info\\s-\\sdownload\\scomplete:\\s\""+resultArrayYoutubeId[1]+".AUDIO\"", "g");
-		var isDownloadComplete = regexDownloadComplete.test(stdout);
-
-		if (isDownloadComplete == true) {
-			io.emit('feedback-processing', 'Processing audio...');
-			convertToWav(resultArrayYoutubeId[1]);
-			return;
+		if (fs.existsSync(dir + '/'+videoId+'.wav')) {
+		    io.emit('feedback-processing', 'Analysing music...');
+ 			callMatcher(videoId);
 		}
 		else {
-			io.emit('completed-warning', 'Failed to download video!');
-			console.log("------------- End of cycle ----------------\n");
-			return;
+	  		var audioOutput = path.resolve(__dirname + '/cache' , videoId+'.mp4');
+			ytdl(url, { quality: 140 }).pipe(fs.createWriteStream(audioOutput))
+			.on('finish', function() {
+				io.emit('feedback-processing', 'Processing audio...');
+ 				convertToWav(videoId);
+ 			});
 		}
-	});
+  	});
 }
 
 // Use ffmpeg to convert to wav audio
 function convertToWav(youtubeId) {
 	var exec = require('child_process').exec;
-	var cmd = 'for %n in (cache/'+youtubeId+'/'+youtubeId+'.AUDIO.mp4) do ffmpeg -i "%n" -ac 1 -map_metadata -1 -ar 44100 "cache/'+youtubeId+'/%~nn.wav"';
+	var cmd = 'for %n in (cache/'+youtubeId+'.mp4) do ffmpeg -i "%n" -ac 1 -map_metadata -1 -ar 44100 "cache/%~nn.wav"';
 	exec(cmd, function(error, stdout, stderr) {
+		console.log(stderr);
 		io.emit('feedback-processing', 'Analysing music...');
 		callMatcher(youtubeId);
 	});
@@ -92,7 +86,7 @@ function convertToWav(youtubeId) {
 
 function callMatcher(youtubeId) {
 	var exec = require('child_process').exec;
-	var cmd = javaExec + ' -Xmx8000M -jar ./matcher/YouSicMatcher.jar ./matcher/songs.db ./cache/'+youtubeId+'/'+youtubeId+'.AUDIO.wav';
+	var cmd = javaExec + ' -Xmx8000M -jar ./matcher/YouSicMatcher.jar ./matcher/songs.db ./cache/'+youtubeId+'.wav';
 	exec(cmd, function(error, stdout, stderr) {
 
 		var startMinArray = [];
@@ -133,12 +127,12 @@ function callMatcher(youtubeId) {
 			for(var i=0;i<songArray.length;i++) {
 				io.emit('add-result', 
 					'<li>' +
-					startMinArray[i]+':'+startSecArray[i]+" - "+endMinArray[i]+':'+endSecArray[i]+" --- "+artistArray[i]+" - "+songArray[i]+
-					'&nbsp;'+
 					'<a href="https://play.spotify.com/search/'+artistArray[i].replace(/\s/g, '%20')+'%20'+songArray[i].replace(/\s/g, '%20')+'">' +
 					'<img src="img/spotify-connect.png"  style="height:30px;">' +
-				 	'</a>' +
-				 	'</li>');
+					'</a>' +
+					'&nbsp;'+
+					startMinArray[i]+':'+startSecArray[i]+" - "+endMinArray[i]+':'+endSecArray[i]+" --- "+artistArray[i]+" - "+songArray[i]+
+					'</li>');
 
 				console.log(startMinArray[i]+':'+startSecArray[i]+" - "+endMinArray[i]+':'+endSecArray[i]+" --- "+artistArray[i]+" - "+songArray[i]);
 			}

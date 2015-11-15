@@ -11,11 +11,15 @@ app.get('/', function(req, res){
 
 io.on('connection', function(socket){
 	socket.on('youtube_url', function(url){
-		io.emit('feedback', 'Downloading video...');
-		io.emit('clear-result', 'clear');
+		
+		console.log("------------ Start of cycle ----------------\n");
 
+		io.emit('feedback-loading', 'Downloading video...');
+		io.emit('clear-result', 'clear');
 		console.log('Server receive : ' + url);
 		downloadYoutube(url);
+
+		console.log("------------- End of cycle ----------------\n");
 	});
 });
 
@@ -36,7 +40,7 @@ function downloadYoutube(url) {
 		var resultArrayYoutubeId = regexYoutubeId.exec(stdout);
 
 		if (resultArrayYoutubeId == null) {
-			io.emit('completed', 'Invalid URL!');
+			io.emit('completed-warning', 'Invalid URL!');
 			return;
 		}
 
@@ -45,11 +49,11 @@ function downloadYoutube(url) {
 		var isAlreadyDownloaded = regexAlreadyDownloaded.test(stdout);
 
 		if (isAlreadyDownloaded == true) {
-			io.emit('feedback', 'Analysing music...');
+			io.emit('feedback-processing', 'Analysing music...');
 			callMatcher(resultArrayYoutubeId[1]);
 		}
 		else {
-			io.emit('feedback', 'Processing audio...');
+			io.emit('feedback-processing', 'Processing audio...');
 			convertToWav(resultArrayYoutubeId[1]);
 		}
 	});
@@ -60,7 +64,7 @@ function convertToWav(youtubeId) {
 	var exec = require('child_process').exec;
 	var cmd = 'for %n in (cache/'+youtubeId+'/'+youtubeId+'.AUDIO.mp4) do ffmpeg -i "%n" -ac 1 -map_metadata -1 -ar 44100 "cache/'+youtubeId+'/%~nn.wav"';
 	exec(cmd, function(error, stdout, stderr) {
-		io.emit('feedback', 'Analysing music...');
+		io.emit('feedback-processing', 'Analysing music...');
 		callMatcher(youtubeId);
 	});
 }
@@ -100,10 +104,10 @@ function callMatcher(youtubeId) {
 			songArray.push(decodeURIComponent(matches[6]));
 		}
 		if (songArray.length == 0) {
-			io.emit('completed', 'Sorry, no music detected!');
+			io.emit('completed-cross', 'Sorry, no music detected!');
 		}
 		else  {
-			io.emit('completed', 'List of music detected');
+			io.emit('completed-tick', 'Completed!');
 			console.log("Music detected:");
 			for(var i=0;i<songArray.length;i++) {
 				io.emit('add-result', 

@@ -20,7 +20,6 @@ io.on('connection', function(socket){
 		console.log('Server receive : ' + url);
 		downloadYoutube(url);
 
-		console.log("------------- End of cycle ----------------\n");
 	});
 });
 
@@ -42,6 +41,7 @@ function downloadYoutube(url) {
 
 		if (resultArrayYoutubeId == null) {
 			io.emit('completed-warning', 'Invalid URL!');
+			console.log("------------- End of cycle ----------------\n");
 			return;
 		}
 
@@ -123,5 +123,6 @@ function callMatcher(youtubeId) {
 				console.log(startMinArray[i]+':'+startSecArray[i]+" - "+endMinArray[i]+':'+endSecArray[i]+" --- "+artistArray[i]+" - "+songArray[i]);
 			}
 		}
+		console.log("------------- End of cycle ----------------\n");
 	});
 }

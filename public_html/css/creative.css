@@ -15,7 +15,8 @@ body {
     margin-left:auto;
     margin-right:auto;
 
-    min-width: 500px;
+    width: 80%;
+    min-width: 200px;
     max-width: 700px;
     background: #FFF;
     padding: 10px 15px 10px 15px;
@@ -26,6 +27,10 @@ body {
     border-radius: 5px;
     -webkit-border-radius: 5px;
     -moz-border-radius: 5px;
+}
+ul li {
+    font-family: 'Open Sans','Helvetica Neue',Arial,sans-serif;
+    font-size: 20px;
 }
 
 body {
@@ -53,6 +58,32 @@ a:hover,
 a:focus {
     color: #eb3812;
 }
+
+a.video-url {
+    color: rgba(255,255,255,.7);
+    -webkit-transition: all .35s;
+    -moz-transition: all .35s;
+    transition: all .35s;
+}
+
+a.video-url:hover,
+a.video-url:focus {
+    color: #00FFFF;
+}
+
+a.result-link {
+    color: rgba(255,255,255,.8);
+    -webkit-transition: all .35s;
+    -moz-transition: all .35s;
+    transition: all .35s;
+}
+
+a.result-link:hover,
+a.result-link:focus {
+    color: #FFFFFF;
+    text-decoration: bold;
+}
+
 
 h1,
 h2,

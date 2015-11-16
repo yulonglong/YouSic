@@ -21,15 +21,15 @@ app.get('/', function(req, res){
 io.on('connection', function(socket){
 	socket.on('youtube_url', function(url){
 		
-		console.log("------------ Start of cycle ----------------\n");
+		console.log("------------ Start of cycle " + socket.id + " ----------------\n");
 
-		io.emit('feedback-loading', 'Downloading video...');
-		io.emit('clear-result', 'clear');
-		io.emit('video-title','');
-		io.emit('video-url', '');
+		io.to(socket.id).emit('feedback-loading', 'Downloading video...');
+		io.to(socket.id).emit('clear-result', 'clear');
+		io.to(socket.id).emit('video-title','');
+		io.to(socket.id).emit('video-url', '');
 
 		console.log('Server receive : ' + url);
-		downloadYoutube(url);
+		downloadYoutube(url, socket.id);
 
 	});
 });
@@ -50,7 +50,7 @@ function createCacheFolder() {
 }
 
 // Download Youtube Video function
-function downloadYoutube(url) {
+function downloadYoutube(url , socketId) {
 	var path   = require('path');
 	var fs     = require('fs');
 	var ytdl   = require('ytdl-core');
@@ -58,13 +58,13 @@ function downloadYoutube(url) {
 	try {
 		ytdl.getInfo(url, function(err, info) {
 			if (info == null ) {
-				io.emit('completed-warning', 'Invalid URL!');
+				io.to(socketId).emit('completed-warning', 'Invalid URL!');
 				return;
 			}
 
 			var videoId = info['video_id'];
-			io.emit('video-title', info['title']);
-			io.emit('video-url', 
+			io.to(socketId).emit('video-title', info['title']);
+			io.to(socketId).emit('video-url', 
 				'<a class=\"video-url\" href=\"' +
 				'https://www.youtube.com/watch?v=' + videoId +
 				'\">' +
@@ -73,37 +73,37 @@ function downloadYoutube(url) {
 
 			var dir = './cache';
 			if (fs.existsSync(dir + '/'+videoId+'.wav')) {
-				io.emit('feedback-processing', 'Analysing music...');
-				callMatcher(videoId);
+				io.to(socketId).emit('feedback-processing', 'Analysing music...');
+				callMatcher(videoId, socketId);
 			}
 			else {
 				var audioOutput = path.resolve(__dirname + '/cache' , videoId+'.mp4');
 				ytdl(url, { quality: 140 }).pipe(fs.createWriteStream(audioOutput))
 				.on('finish', function() {
-					io.emit('feedback-processing', 'Processing audio...');
-					convertToWav(videoId);
+					io.to(socketId).emit('feedback-processing', 'Processing audio...');
+					convertToWav(videoId, socketId);
 				});
 			}
 		});
 	}
 	catch (err) {
 		console.log(err);
-		io.emit('completed-warning', 'Invalid URL!');
+		io.to(socketId).emit('completed-warning', 'Invalid URL!');
 	}
 }
 
 // Use ffmpeg to convert to wav audio
-function convertToWav(youtubeId) {
+function convertToWav(youtubeId, socketId) {
 	var exec = require('child_process').exec;
 	var cmd = 'for %n in (cache/'+youtubeId+'.mp4) do ffmpeg -i "%n" -ac 1 -map_metadata -1 -ar 44100 "cache/%~nn.wav"';
 	exec(cmd, function(error, stdout, stderr) {
 		console.log(stderr);
-		io.emit('feedback-processing', 'Analysing music...');
-		callMatcher(youtubeId);
+		io.to(socketId).emit('feedback-processing', 'Analysing music...');
+		callMatcher(youtubeId, socketId);
 	});
 }
 
-function callMatcher(youtubeId) {
+function callMatcher(youtubeId, socketId) {
 	var exec = require('child_process').exec;
 	var cmd = javaExec + ' -Xmx8000M -jar ./matcher/YouSicMatcher.jar ./matcher/songs.db ./cache/'+youtubeId+'.wav';
 	exec(cmd, function(error, stdout, stderr) {
@@ -140,13 +140,13 @@ function callMatcher(youtubeId) {
 			songArray.push(decodeURIComponent(matches[6]));
 		}
 		if (songArray.length == 0) {
-			io.emit('completed-cross', 'Sorry, no music detected!');
+			io.to(socketId).emit('completed-cross', 'Sorry, no music detected!');
 		}
 		else  {
-			io.emit('completed-tick', 'Completed!');
+			io.to(socketId).emit('completed-tick', 'Completed!');
 			console.log("Music detected:");
 			for(var i=0;i<songArray.length;i++) {
-				io.emit('add-result', 
+				io.to(socketId).emit('add-result', 
 					'<li>' +
 					'<a href="https://play.spotify.com/search/'+artistArray[i].replace(/\s/g, '%20')+'%20'+songArray[i].replace(/\s/g, '%20')+'">' +
 					'<img src="img/spotify-connect.png"  style="height:30px;">' +
@@ -158,6 +158,6 @@ function callMatcher(youtubeId) {
 				console.log(startMinArray[i]+':'+startSecArray[i]+" - "+endMinArray[i]+':'+endSecArray[i]+" --- "+artistArray[i]+" - "+songArray[i]);
 			}
 		}
-		console.log("------------- End of cycle ----------------\n");
+		console.log("------------- End of cycle " + socketId + " ----------------\n");
 	});
 }

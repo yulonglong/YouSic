@@ -25,6 +25,7 @@ io.on('connection', function(socket){
 
 		io.to(socket.id).emit('feedback-loading', 'Downloading video...');
 		io.to(socket.id).emit('clear-result', 'clear');
+		io.to(socket.id).emit('embed-youtube','');
 		io.to(socket.id).emit('video-title','');
 		io.to(socket.id).emit('video-url', '');
 
@@ -96,7 +97,7 @@ function downloadYoutube(url , socketId) {
 // Use ffmpeg to convert to wav audio
 function convertToWav(youtubeId, socketId) {
 	var exec = require('child_process').exec;
-	var cmd = 'for %n in (cache/'+youtubeId+'.mp4) do ffmpeg -i "%n" -ac 1 -map_metadata -1 -ar 44100 "cache/%~nn.wav"';
+	var cmd = 'for %n in (cache/'+youtubeId+'.mp4) do "matcher/ffmpeg" -i "%n" -ac 1 -map_metadata -1 -ar 44100 "cache/%~nn.wav"';
 	exec(cmd, function(error, stdout, stderr) {
 		console.log(stderr);
 		io.to(socketId).emit('feedback-processing', 'Analysing music...');
@@ -171,7 +172,7 @@ function createYoutubeEmbedded(socketId, videoId) {
 	var youtubeString = 
 	('<iframe id=\"ytplayer-iframe\" type=\"text/html\" ' +
 	'width=\"640\" height=\"360\" ' +
-	'src=\"http://www.youtube.com/embed/'+videoId+'?autoplay=1'+'\" ' +
+	'src=\"http://www.youtube.com/embed/'+videoId+'\" ' +
 	'frameborder=\"0\"/>');
 
 	io.to(socketId).emit('embed-youtube', youtubeString);

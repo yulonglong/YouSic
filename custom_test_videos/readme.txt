@@ -33,7 +33,7 @@ https://www.youtube.com/watch?v=_K5HkPQQvrk
 --
 Boys Like Girls - Hells Over Head
 DEPAPEPE - La Tanta
-DEPAPEPE - ?? Koimizu (Tears of Love)
+DEPAPEPE - 恋水 Koimizu (Tears of Love)
 Link Wray - Rumble
 Simple Plan - Jump
 
@@ -58,7 +58,7 @@ https://www.youtube.com/watch?v=4bWm2yE49Fo
 Whole song:
 Taylor Swift - 22
 
-customtc4
+customtc5
 https://youtu.be/Bem_W84Em1M
 Whole song:
 Ted Nugent - Stranglehold
@@ -95,3 +95,20 @@ https://www.youtube.com/watch?v=u60Pb8vd4rM
 tc6
 https://www.youtube.com/watch?v=cpbbuaIA3Ds
 0:00 - 6:32 -> Pink Floyd - Money - Money
+
+================================================================================
+Real Test Video Links (Music videos)
+================================================================================
+
+The Script - The Man Who Can't Be Moved
+https://www.youtube.com/watch?v=gS9o1FAszdk
+
+Taylor Swift - 22
+https://www.youtube.com/watch?v=AgFeZr5ptV8
+
+Maroon 5 - Love Somebody
+https://www.youtube.com/watch?v=MU8B4XDI3Uw
+
+
+
+

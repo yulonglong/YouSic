@@ -116,8 +116,8 @@ public class Main {
 	}
 
 	private static PriorityQueue<Result> match(MFCC mfcc, File sampleFilePath, String databaseFilePath) throws FileNotFoundException, IOException, ClassNotFoundException {
-//		System.out.println("Processing sample...");
-//		Timer.greset();
+		System.err.println("Processing sample...");
+		Timer.greset();
 
 //		Song sample = (Song)ObjectIO.readObject("C:/Users/Ian/Google Drive/Music/TestcaseVideo/tc5.db");
 //		double sampleMfcc[][] = sample.getMfcc();
@@ -126,8 +126,8 @@ public class Main {
 		double sampleMfcc[][] = mfcc.process(sampleData);
 		int sampleLength = sampleMfcc.length;
 
-//		System.out.println("Sample processed. Matching...");
-//		Timer.gtime();
+		System.err.println("Sample processed. Matching...");
+		Timer.gtime();
 
 		ObjectInputStream ois = new ObjectInputStream(new FileInputStream(databaseFilePath));
 		PriorityQueue<Result> results = new PriorityQueue<Result>();
@@ -188,14 +188,15 @@ public class Main {
 
 		for(Result i : results)
 			System.err.println(i);
+		System.err.println();
 
 		// Reorder results by sample start time
 		PriorityQueue<Result> tempResults = new PriorityQueue<>(Result.SAMPLE_START_TIME_COMPARATOR);
 		tempResults.addAll(results);
 		results = tempResults;
 
-//		System.out.println("Matching done.");
-//		Timer.gtime();
+		System.err.println("Matching done.");
+		Timer.gtime();
 
 		return results;
 	}

@@ -11,7 +11,7 @@ public class Timer {
 			lastTime = new Date().getTime();
 		else {
 			long newTime = new Date().getTime();
-			System.out.println("Time taken: " + (newTime - lastTime) + "ms");
+			System.err.println("Time taken: " + (newTime - lastTime) + "ms");
 			lastTime = newTime;
 		}
 	}

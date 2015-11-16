@@ -97,7 +97,7 @@ function downloadYoutube(url , socketId) {
 // Use ffmpeg to convert to wav audio
 function convertToWav(youtubeId, socketId) {
 	var exec = require('child_process').exec;
-	var cmd = 'for %n in (cache/'+youtubeId+'.mp4) do ffmpeg -i "%n" -ac 1 -map_metadata -1 -ar 44100 "cache/%~nn.wav"';
+	var cmd = 'for %n in (cache/'+youtubeId+'.mp4) do "matcher/ffmpeg" -i "%n" -ac 1 -map_metadata -1 -ar 44100 "cache/%~nn.wav"';
 	exec(cmd, function(error, stdout, stderr) {
 		console.log(stderr);
 		io.to(socketId).emit('feedback-processing', 'Analysing music...');

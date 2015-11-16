@@ -25,6 +25,7 @@ io.on('connection', function(socket){
 
 		io.to(socket.id).emit('feedback-loading', 'Downloading video...');
 		io.to(socket.id).emit('clear-result', 'clear');
+		io.to(socket.id).emit('embed-youtube','');
 		io.to(socket.id).emit('video-title','');
 		io.to(socket.id).emit('video-url', '');
 

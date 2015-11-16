@@ -70,6 +70,7 @@ function downloadYoutube(url , socketId) {
 				'\">' +
 				'https://www.youtube.com/watch?v=' + videoId +
 				'</a>');
+			createYoutubeEmbedded(socketId,videoId,0,0);
 
 			var dir = './cache';
 			if (fs.existsSync(dir + '/'+videoId+'.wav')) {
@@ -160,4 +161,17 @@ function callMatcher(youtubeId, socketId) {
 		}
 		console.log("------------- End of cycle " + socketId + " ----------------\n");
 	});
+}
+
+
+function createYoutubeEmbedded(socketId, videoId, startMin, startSec) {
+	var startTime = startMin*60 + startSec;
+
+	var youtubeString = 
+	('<iframe id=\"ytplayer-iframe\" type=\"text/html\" ' +
+	'width=\"640\" height=\"390\" ' +
+	'src=\"http://www.youtube.com/embed/'+videoId+'?autoplay=1&start='+startTime+'\" ' +
+	'frameborder=\"0\"/>');
+
+	io.to(socketId).emit('embed-youtube', youtubeString);
 }

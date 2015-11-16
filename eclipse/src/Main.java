@@ -199,7 +199,7 @@ public class Main {
 //		System.out.println("Flatten: " + results.size());
 
 		String songName = results.peek().getSong();
-		double lowerThreshold = results.peek().getMfcc() - 0.002;
+		double lowerThreshold = results.peek().getMfcc() - 0.005;
 
 		double mfccScores[] = new double[sampleLength];
 		while(!results.isEmpty()) {

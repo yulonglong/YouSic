@@ -107,7 +107,7 @@ function convertToWav(youtubeId, socketId) {
 
 function callMatcher(youtubeId, socketId) {
 	var exec = require('child_process').exec;
-	var cmd = javaExec + ' -Xmx8000M -jar ./matcher/YouSicMatcher.jar ./matcher/songs.db ./cache/'+youtubeId+'.wav';
+	var cmd = javaExec + ' -Dfile.encoding=UTF-8 -Xmx8000M -jar ./matcher/YouSicMatcher.jar ./matcher/songs.db ./cache/'+youtubeId+'.wav';
 	exec(cmd, function(error, stdout, stderr) {
 		console.log(stdout);
 		console.log(stderr);

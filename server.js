@@ -172,7 +172,7 @@ function createYoutubeEmbedded(socketId, videoId) {
 	var youtubeString = 
 	('<iframe id=\"ytplayer-iframe\" type=\"text/html\" ' +
 	'width=\"640\" height=\"360\" ' +
-	'src=\"http://www.youtube.com/embed/'+videoId+'?autoplay=1'+'\" ' +
+	'src=\"http://www.youtube.com/embed/'+videoId+'\" ' +
 	'frameborder=\"0\"/>');
 
 	io.to(socketId).emit('embed-youtube', youtubeString);

@@ -17,11 +17,14 @@ import SignalProcess.WaveIO;
 import Tool.ObjectIO;
 import Tool.Timer;
 
+@SuppressWarnings("unused")
 public class Main {
 
 	private static final double MFCC_SIMILARITY_THRESHOLD = 0.985;
-	private static final double MFCC_ACCEPTANCE_THRESHOLD = 0.985;
-	private static final int FRAME_COUNT_ACCEPTANCE_THRESHOLD = 15; // Multiply by 0.75 secs for actual length.
+	private static final double MFCC_ACCEPTANCE_THRESHOLD = 0.993;
+	private static final int FRAME_COUNT_ACCEPTANCE_THRESHOLD = 12; // Multiply by 0.75 secs for actual length.
+	private static final double MFCC_FLATTEN_LOWER_THRESHOLD = 0.004; // The maximum percentage difference of MFCC score a matched sample can go compared to the best match
+	private static final int NON_MATCH_FRAME_TOLERANCE = 3;
 
 	private static final FilenameFilter WAV_EXTENSION_FILTER = new FilenameFilter() {
 		@Override
@@ -172,20 +175,24 @@ public class Main {
 			results.addAll(songResults);
 		}
 
+		ois.close();
+
 		removeMultipleHits(results, sampleLength);
+
+//		System.out.println("Results count: " + results.size());
+//		int printCount = 0;
+//		while(!results.isEmpty() && printCount != 100) {
+//			System.err.println(results.poll());
+//			printCount++;
+//		}
+
+		for(Result i : results)
+			System.err.println(i);
 
 		// Reorder results by sample start time
 		PriorityQueue<Result> tempResults = new PriorityQueue<>(Result.SAMPLE_START_TIME_COMPARATOR);
 		tempResults.addAll(results);
 		results = tempResults;
-
-//		System.out.println("Results count: " + results.size());
-//		int printCount = 0;
-//		while(!results.isEmpty() && printCount != 100) {
-//			System.out.println(results.poll());
-//			printCount++;
-//		}
-		ois.close();
 
 //		System.out.println("Matching done.");
 //		Timer.gtime();
@@ -196,10 +203,17 @@ public class Main {
 	private static void flattenResults(PriorityQueue<Result> results, int songLength, int sampleLength) {
 		if(results.isEmpty()) return;
 
-//		System.out.println("Flatten: " + results.size());
-
 		String songName = results.peek().getSong();
-		double lowerThreshold = results.peek().getMfcc() - 0.005;
+		double lowerThreshold = results.peek().getMfcc() - MFCC_FLATTEN_LOWER_THRESHOLD;
+
+		double mfccAverage = 0.0;
+		for(Result i : results) {
+			mfccAverage += i.getMfcc();
+		}
+//		System.err.println(songName);
+//		System.err.println("Flatten: " + results.size());
+//		System.err.println(mfccAverage / results.size());
+//		System.err.println();
 
 		double mfccScores[] = new double[sampleLength];
 		while(!results.isEmpty()) {
@@ -215,7 +229,8 @@ public class Main {
 		}
 
 //		System.out.println(songName);
-//		System.out.println(Arrays.toString(mfccScores));
+
+		PriorityQueue<Result> resultsByTime = new PriorityQueue<Result>(Result.SAMPLE_START_TIME_COMPARATOR);
 
 		double totalMfccScore = 0.0;
 		int totalMfccCount = 0;
@@ -223,8 +238,7 @@ public class Main {
 		for(i = 0; i < mfccScores.length; i++) {
 			if(mfccScores[i] == 0.0) {
 				if(totalMfccCount != 0) {
-					//new Result(mfcc, songStartPosition, sampleStartPosition, length, song)
-					results.add(new Result(totalMfccScore / totalMfccCount, -1, i - totalMfccCount, totalMfccCount, songName));
+					resultsByTime.add(new Result(totalMfccScore / totalMfccCount, -1, i - totalMfccCount, totalMfccCount, songName));
 					totalMfccScore = 0.0;
 					totalMfccCount = 0;
 				}
@@ -236,10 +250,35 @@ public class Main {
 		}
 
 		if(totalMfccCount != 0) {
-			results.add(new Result(totalMfccScore / totalMfccCount, -1, i - totalMfccCount, totalMfccCount, songName));
+			resultsByTime.add(new Result(totalMfccScore / totalMfccCount, -1, i - totalMfccCount, totalMfccCount, songName));
 			totalMfccScore = 0.0;
 			totalMfccCount = 0;
 		}
+
+		if(resultsByTime.isEmpty())
+			return;
+
+		Result currentResult = resultsByTime.poll();
+		while(!resultsByTime.isEmpty()) {
+			Result nextResult = resultsByTime.poll();
+			if(nextResult.getSampleStartPosition() - currentResult.getSampleStartPosition() - currentResult.getLength() <= NON_MATCH_FRAME_TOLERANCE) {
+
+				//new Result(mfcc, songStartPosition, sampleStartPosition, length, song)
+				currentResult = new Result(
+					currentResult.getMfcc() * currentResult.getLength() / (currentResult.getLength() + nextResult.getLength())
+						+ nextResult.getMfcc() * nextResult.getLength() / (currentResult.getLength() + nextResult.getLength()),
+					currentResult.getSongStartPosition(),
+					currentResult.getSampleStartPosition(),
+					currentResult.getLength() + nextResult.getLength() + (nextResult.getSampleStartPosition() - currentResult.getSampleStartPosition() - currentResult.getLength()),
+					currentResult.getSong()
+				);
+			}
+			else {
+				results.add(currentResult);
+				currentResult = nextResult;
+			}
+		}
+		results.add(currentResult);
 	}
 
 	private static void removeMultipleHits(PriorityQueue<Result> results, int sampleLength) {
@@ -266,7 +305,7 @@ public class Main {
 				}
 			}
 
-			if((double) hitCount / r.getLength() >= 0.6) {
+			if(hitCount >= FRAME_COUNT_ACCEPTANCE_THRESHOLD) {
 				r.setSampleStartPosition(firstHitPosition);
 				r.setLength(hitCount);
 				acceptedResults.add(r);

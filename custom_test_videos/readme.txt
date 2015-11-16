@@ -53,6 +53,15 @@ Warrant - Cherry Pie
 Yiruma - Eve
 Yiruma - Small steps
 
+customtc4
+https://www.youtube.com/watch?v=4bWm2yE49Fo
+Whole song:
+Taylor Swift - 22
+
+customtc4
+https://youtu.be/Bem_W84Em1M
+Whole song:
+Ted Nugent - Stranglehold
 
 ================================================================================
 Real Test Video Links from Youtube(Timings close approximation, if available)

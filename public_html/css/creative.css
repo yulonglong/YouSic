@@ -71,6 +71,19 @@ a.video-url:focus {
     color: #00FFFF;
 }
 
+a.result-link {
+    color: rgba(255,255,255,.8);
+    -webkit-transition: all .35s;
+    -moz-transition: all .35s;
+    transition: all .35s;
+}
+
+a.result-link:hover,
+a.result-link:focus {
+    color: #FFFFFF;
+    text-decoration: bold;
+}
+
 
 h1,
 h2,

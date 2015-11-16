@@ -153,7 +153,11 @@ function callMatcher(youtubeId, socketId) {
 					'<img src="img/spotify-connect.png"  style="height:30px;">' +
 					'</a>' +
 					'&nbsp;'+
+					'<a class=\"result-link\" href="javascript:void(0);" onclick="setYoutubeEmbeddedStart(' +
+						'\''+youtubeId+'\''+','+startMinArray[i]+','+startSecArray[i]+','+endMinArray[i]+','+endSecArray[i]+');" >' +
+
 					startMinArray[i]+':'+startSecArray[i]+" - "+endMinArray[i]+':'+endSecArray[i]+" --- "+artistArray[i]+" - "+songArray[i]+
+					'</a>' +
 					'</li>');
 
 				console.log(startMinArray[i]+':'+startSecArray[i]+" - "+endMinArray[i]+':'+endSecArray[i]+" --- "+artistArray[i]+" - "+songArray[i]);
@@ -163,14 +167,11 @@ function callMatcher(youtubeId, socketId) {
 	});
 }
 
-
-function createYoutubeEmbedded(socketId, videoId, startMin, startSec) {
-	var startTime = startMin*60 + startSec;
-
+function createYoutubeEmbedded(socketId, videoId) {
 	var youtubeString = 
 	('<iframe id=\"ytplayer-iframe\" type=\"text/html\" ' +
-	'width=\"640\" height=\"390\" ' +
-	'src=\"http://www.youtube.com/embed/'+videoId+'?autoplay=1&start='+startTime+'\" ' +
+	'width=\"640\" height=\"360\" ' +
+	'src=\"http://www.youtube.com/embed/'+videoId+'?autoplay=1'+'\" ' +
 	'frameborder=\"0\"/>');
 
 	io.to(socketId).emit('embed-youtube', youtubeString);

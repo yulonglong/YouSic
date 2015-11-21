@@ -1,7 +1,7 @@
 {
-  "name": "YouSic",
+  "name": "YouSiq",
   "version": "0.0.1",
-  "description": "my first socket.io app",
+  "description": "YouSiq - YouTube Music Recognizer",
   "dependencies": {
     "express": "^4.10.2",
     "socket.io": "1.2.0",

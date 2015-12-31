@@ -1,6 +1,6 @@
 {
   "name": "YouSiq",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "YouSiq - YouTube Music Recognizer",
   "dependencies": {
     "express": "^4.10.2",

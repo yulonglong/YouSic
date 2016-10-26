@@ -32,6 +32,21 @@ io.on('connection', function(socket){
 		console.log('Server receive : ' + url);
 		downloadYoutube(url, socket.id);
 
+	}),
+
+	socket.on('youtube_url_download_link', function(url){
+		console.log(url);
+		console.log("------------ Start of cycle " + socket.id + " ----------------\n");
+		io.to(socket.id).emit('feedback-loading', 'Processing URL...');
+		io.to(socket.id).emit('clear-result', 'clear');
+		io.to(socket.id).emit('embed-youtube','');
+		io.to(socket.id).emit('video-title','');
+		io.to(socket.id).emit('video-url', '');
+
+		console.log('Server receive : ' + url);
+		console.log('Retrieving youtube downloadable links...');
+		getYoutubeDownloadLinks(url, socket.id);
+
 	});
 });
 
@@ -48,6 +63,60 @@ function createCacheFolder() {
 	if (!fs.existsSync(dir)){
 		fs.mkdirSync(dir);
 	}
+}
+
+// Get youtube download links function
+function getYoutubeDownloadLinks(url , socketId) {
+	var path   = require('path');
+	var fs     = require('fs');
+	var ytdl   = require('ytdl-core');
+
+	try {
+		ytdl.getInfo(url, function(err, info) {
+			if (info == null ) {
+				io.to(socketId).emit('completed-warning', 'Invalid URL!');
+				return;
+			}
+
+			var videoId = info['video_id'];
+			io.to(socketId).emit('video-title', info['title']);
+			io.to(socketId).emit('video-url', 
+				'<a class=\"video-url\" href=\"' +
+				'https://www.youtube.com/watch?v=' + videoId +
+				'\">' +
+				'https://www.youtube.com/watch?v=' + videoId +
+				'</a>');
+			createYoutubeEmbedded(socketId,videoId,0,0);
+
+			var formats = info['formats'];
+			var formatsArrayLength = formats.length;
+			for (var i = 0; i < formatsArrayLength; i++) {
+				var currFormat = formats[i];
+				io.to(socketId).emit('add-result', 
+					'<li>' +
+					'<a href="' + currFormat['url'] + '" style="color: blue;" target="_blank" download="'+ currFormat['url'] +'">' +
+					'Download' +
+					'</a>' +
+					'&nbsp;'+
+					'<i class="fa fa-file-video-o" aria-hidden="true"></i>' + '&nbsp;'+
+					(currFormat['quality'] || currFormat['quality_label']) + ' | '+
+					currFormat['encoding'] + ' | '+
+					currFormat['container'] + ' | '+
+					currFormat['resolution'] + ' | '+
+					'<i class="fa fa-file-audio-o" aria-hidden="true"></i>' +'&nbsp;'+
+					currFormat['audioEncoding'] + ' | '+
+					currFormat['audioBitrate'] +
+					'</li>');
+			}
+
+			io.to(socketId).emit('completed-tick', 'Completed!');
+		});
+	}
+	catch (err) {
+		console.log(err);
+		io.to(socketId).emit('completed-warning', 'Invalid URL!');
+	}
+	console.log("------------- End of cycle " + socketId + " ----------------\n");
 }
 
 // Download Youtube Video function

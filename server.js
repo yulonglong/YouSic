@@ -6,10 +6,13 @@ var port = process.env.PORT || 1338;
 
 // Azure path
 var javaExec = "\"D:/Program Files/Java/jdk1.8.0_60/bin/java\"";
+var ffmpegExec = "matcher/ffmpeg"; // For windows, using the binary ffmpeg.exe in folder matcher
+var os = "linux"; // edit this according to the os running this app "windows" or "linux"
 
 // Local path
 if (port == 1338) {
 	javaExec = "java";
+	ffmpegExec = "ffmpeg"; // Please sudo apt-get install ffmpeg
 }
 
 app.use(express.static(__dirname + '/public_html'));
@@ -166,7 +169,11 @@ function downloadYoutube(url , socketId) {
 // Use ffmpeg to convert to wav audio
 function convertToWav(youtubeId, socketId) {
 	var exec = require('child_process').exec;
-	var cmd = 'for %n in (cache/'+youtubeId+'.mp4) do "matcher/ffmpeg" -i "%n" -ac 1 -map_metadata -1 -ar 44100 "cache/%~nn.wav"';
+	var filename = "cache/" + youtubeId + ".mp4";
+	var cmd = ffmpegExec + ' -i "'+ filename +'" -ac 1 -map_metadata -1 -ar 44100 "cache/'+ youtubeId +'.wav"';
+	if (os == "windows") {
+		cmd = 'for %n in (cache/'+youtubeId+'.mp4) do "'+ffmpegExec+'" -i "%n" -ac 1 -map_metadata -1 -ar 44100 "cache/%~nn.wav"';
+	}
 	exec(cmd, function(error, stdout, stderr) {
 		console.log(stderr);
 		io.to(socketId).emit('feedback-processing', 'Analysing music...');
@@ -178,8 +185,12 @@ function callMatcher(youtubeId, socketId) {
 	var exec = require('child_process').exec;
 	var cmd = javaExec + ' -Dfile.encoding=UTF-8 -Xmx8000M -jar ./matcher/YouSicMatcher.jar ./matcher/songs.db ./cache/'+youtubeId+'.wav';
 	exec(cmd, function(error, stdout, stderr) {
+		console.log("=========== stdout from matcher ============");
 		console.log(stdout);
+		console.log("=========== end stdout from matcher =============")
+		console.log("=========== stderr from matcher ============")
 		console.log(stderr);
+		console.log("=========== end stderr from matcher =============")
 
 		var startMinArray = [];
 		var startSecArray = [];
@@ -190,8 +201,8 @@ function callMatcher(youtubeId, socketId) {
 		var matches;
 
 		// Regex the youtube id from stdout
-		var regexMatchedSongs = new RegExp("([0-9]+)\\s([0-9]+)\\s([0-9]+)\\s([0-9]+)\\s(.+)\\s-\\s(.+)\\r\\n", "g");
-
+		var regexMatchedSongs = new RegExp("([0-9]+)\\s([0-9]+)\\s([0-9]+)\\s([0-9]+)\\s(.+)\\s\\-\\s(.+)", "g");
+		
 		while (matches = regexMatchedSongs.exec(stdout)) {
 			startMinArray.push(decodeURIComponent(matches[1]));
 			if (matches[2].length == 1) {

@@ -2,13 +2,13 @@ var express = require('express');
 var app = require('express')();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
-var port = process.env.PORT || 1337;
+var port = process.env.PORT || 1338;
 
 // Azure path
 var javaExec = "\"D:/Program Files/Java/jdk1.8.0_60/bin/java\"";
 
 // Local path
-if (port == 1337) {
+if (port == 1338) {
 	javaExec = "java";
 }
 

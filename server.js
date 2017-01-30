@@ -1,3 +1,6 @@
+#!/usr/bin/env nodejs
+// Tell the server the location and name of the node application
+
 var express = require('express');
 var app = require('express')();
 var http = require('http').Server(app);

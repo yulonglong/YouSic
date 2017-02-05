@@ -94,34 +94,44 @@ function getYoutubeDownloadLinks(url , socketId) {
 				'</a>');
 			createYoutubeEmbedded(socketId,videoId,0,0);
 
+			var videoAndAudio = false;
+			var videoOnly = false;
+			var audioOnly = false;
+
 			var formats = info['formats'];
 			var formatsArrayLength = formats.length;
 			for (var i = 0; i < formatsArrayLength; i++) {
 				var currFormat = formats[i];
 
 				// BEGIN - Added for easy download section
-				if (currFormat['quality'] == 'hd720') {
+				if ((!videoAndAudio) &&
+				((currFormat['quality'] == 'hd720') || (currFormat['quality'] == 'medium')) &&
+				(currFormat['container']== 'mp4')) {
 					io.to(socketId).emit('add-easy-result', 
 					'<li><a href="' + currFormat['url'] + '" style="color: blue;" target="_blank" download="'+ currFormat['url'] +'">' +
 					'Video and audio download</a></li>');
+					videoAndAudio = true;
 				}
-				else if ((currFormat['encoding'] == 'H.264') && 
-							(currFormat['container'] == 'mp4') && 
-							(currFormat['resolution'] == '1080p') &&
-							(currFormat['audioEncoding'] == null) &&
-							(currFormat['audioBitrate'] == null)) {
+				if ((!videoOnly) && 
+				((currFormat['encoding'] == 'H.264') && 
+				(currFormat['container'] == 'mp4') && 
+				(currFormat['audioEncoding'] == null) &&
+				(currFormat['audioBitrate'] == null))) {
 					io.to(socketId).emit('add-easy-result', 
 					'<li><a href="' + currFormat['url'] + '" style="color: blue;" target="_blank" download="'+ currFormat['url'] +'">' +
 					'Video only download</a></li>');
+					videoOnly = true;
 				}
-				else if ((currFormat['encoding'] == null) && 
-							(currFormat['container'] == 'mp4') && 
-							(currFormat['resolution'] == null) &&
-							(currFormat['audioEncoding'] == 'aac') &&
-							(currFormat['audioBitrate'] >= 128)) {
+				if ((!audioOnly) &&
+				((currFormat['encoding'] == null) && 
+				(currFormat['container'] == 'mp4') && 
+				(currFormat['resolution'] == null) &&
+				(currFormat['audioEncoding'] == 'aac') &&
+				(currFormat['audioBitrate'] >= 64))) {
 					io.to(socketId).emit('add-easy-result', 
 					'<li><a href="' + currFormat['url'] + '" style="color: blue;" target="_blank" download="'+ currFormat['url'] +'">' +
 					'Audio only download</a></li>');
+					audioOnly = true;
 				}
 				// END - easy download section
 

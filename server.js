@@ -98,6 +98,33 @@ function getYoutubeDownloadLinks(url , socketId) {
 			var formatsArrayLength = formats.length;
 			for (var i = 0; i < formatsArrayLength; i++) {
 				var currFormat = formats[i];
+
+				// BEGIN - Added for easy download section
+				if (currFormat['quality'] == 'hd720') {
+					io.to(socketId).emit('add-easy-result', 
+					'<li><a href="' + currFormat['url'] + '" style="color: blue;" target="_blank" download="'+ currFormat['url'] +'">' +
+					'Video and audio download</a></li>');
+				}
+				else if ((currFormat['encoding'] == 'H.264') && 
+							(currFormat['container'] == 'mp4') && 
+							(currFormat['resolution'] == '1080p') &&
+							(currFormat['audioEncoding'] == null) &&
+							(currFormat['audioBitrate'] == null)) {
+					io.to(socketId).emit('add-easy-result', 
+					'<li><a href="' + currFormat['url'] + '" style="color: blue;" target="_blank" download="'+ currFormat['url'] +'">' +
+					'Video only download</a></li>');
+				}
+				else if ((currFormat['encoding'] == null) && 
+							(currFormat['container'] == 'mp4') && 
+							(currFormat['resolution'] == null) &&
+							(currFormat['audioEncoding'] == 'aac') &&
+							(currFormat['audioBitrate'] >= 128)) {
+					io.to(socketId).emit('add-easy-result', 
+					'<li><a href="' + currFormat['url'] + '" style="color: blue;" target="_blank" download="'+ currFormat['url'] +'">' +
+					'Audio only download</a></li>');
+				}
+				// END - easy download section
+
 				io.to(socketId).emit('add-result', 
 					'<li>' +
 					'<a href="' + currFormat['url'] + '" style="color: blue;" target="_blank" download="'+ currFormat['url'] +'">' +

@@ -114,6 +114,11 @@
 					<div id="ytplayer"></div>
 					<h2 id="video-title"></h2>
 					<h4 id="video-url"></h4>
+
+					<h2 id="easy-result-title"></h2>
+					<ul style="display: inline-block; text-align: left;" id="easy-result"></ul>
+
+					<h2 id="result-title"></h2>
 					<ul style="display: inline-block; text-align: left;" id="result"></ul>
 			 
 					<!-- <a href="#" class="btn btn-default btn-xl">Go!</a> -->
@@ -201,11 +206,23 @@
 			document.getElementById("go-button").innerHTML = 'Go!';
 			document.getElementById("go-button").disabled = false;
 		});
+		socket.on('add-easy-result', function(msg){
+			if (!$('#easy-result-title').html()) {
+				$('#easy-result-title').html('Easy download:');
+			}
+			$('#easy-result').append(msg);
+		});
 		socket.on('add-result', function(msg){
+			if (!$('#result-title').html()) {
+				$('#result-title').html('Advanced download:');
+			}
 			$('#result').append(msg);
 		});
 		socket.on('clear-result', function(msg){
 			$('#result').empty();
+			$('#result-title').empty();
+			$('#easy-result').empty();
+			$('#easy-result-title').empty();
 		});
 		socket.on('video-title', function(msg){
 			document.getElementById("video-title").innerHTML = (msg);

@@ -71,6 +71,21 @@ function createCacheFolder() {
 	}
 }
 
+function rmDir(dirPath, removeSelf) {
+	if (removeSelf === undefined) removeSelf = true;
+	try { var files = fs.readdirSync(dirPath); }
+	catch(e) { return; }
+	if (files.length > 0)
+	for (var i = 0; i < files.length; i++) {
+		var filePath = dirPath + '/' + files[i];
+		if (fs.statSync(filePath).isFile())
+			fs.unlinkSync(filePath);
+		else
+			rmDir(filePath);
+	}
+	if (removeSelf) fs.rmdirSync(dirPath);
+};
+
 // Get youtube download links function
 function getYoutubeDownloadLinks(url , socketId) {
 	var path   = require('path');
@@ -167,6 +182,9 @@ function downloadYoutube(url , socketId) {
 	var path   = require('path');
 	var fs     = require('fs');
 	var ytdl   = require('ytdl-core');
+	
+	// Remove cache folder contents to due to space constraint
+	rmDir('./cache', false);
 
 	try {
 		ytdl.getInfo(url, function(err, info) {

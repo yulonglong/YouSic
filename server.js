@@ -72,6 +72,7 @@ function createCacheFolder() {
 }
 
 function rmDir(dirPath, removeSelf) {
+	var fs     = require('fs');
 	if (removeSelf === undefined) removeSelf = true;
 	try { var files = fs.readdirSync(dirPath); }
 	catch(e) { return; }
@@ -84,7 +85,7 @@ function rmDir(dirPath, removeSelf) {
 			rmDir(filePath);
 	}
 	if (removeSelf) fs.rmdirSync(dirPath);
-};
+}
 
 // Get youtube download links function
 function getYoutubeDownloadLinks(url , socketId) {
